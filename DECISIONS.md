@@ -30,7 +30,18 @@ Product and technical choices that are not obvious from the code. Append; do not
 | Membership lock | Trigger allows status change only when completing onboarding | Keeps role lock; lets `complete_onboarding` RPC set visitor/pending. |
 | Tabs | Directory tab added; Media hidden (`href: null`) until Phase 3 | Keeps tab bar focused on built features. |
 
-## 2026-03-19 — Web hosting (Vercel)
+## 2026-03-19 — Phase 3 media
+
+| Decision | Choice | Why |
+|---|---|---|
+| Video | Official YouTube IFrame (`react-native-youtube-iframe` + web iframe) | Spec forbids scraping/downloading YouTube. |
+| Live fallback | Same `media_item`; clear `is_live`, keep/update `youtube_id` to archive | YouTube auto-archives live → VOD. |
+| Audio | `expo-audio` + Supabase Storage `sermon-audio` bucket | Self-hosted MP3; background playback enabled. |
+| Offline audio | Download to document dir via `expo-file-system` | Spec requires offline for self-hosted audio (mobile). |
+| Photos | `photo_albums` + `photos` + `photo-albums` bucket | Event link nullable until Phase 4. |
+| Admin publishing | Deferred to Phase 7 | Members can view; empty states until content exists. |
+| Audio UI | Show player only when `audio_status = ready` | Spec: no dead button / coming soon. |
+
 
 | Decision | Choice | Why |
 |---|---|---|

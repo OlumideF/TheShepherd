@@ -93,7 +93,6 @@ export default function TabsLayout() {
         name="media"
         options={{
           title: 'Media',
-          href: null,
           tabBarIcon: ({ color }) => (
             <TabIcon
               ios="play.rectangle.fill"

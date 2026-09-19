@@ -30,6 +30,14 @@
       "expo-router",
       "expo-secure-store",
       [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true,
+          "enableBackgroundRecording": false
+        }
+      ],
+      "expo-sharing",
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/church-logo.png",

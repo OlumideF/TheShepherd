@@ -117,6 +117,8 @@ export default function RootLayout() {
             <Stack.Screen name="onboarding" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="member/[id]" options={{ headerShown: true, title: 'Member' }} />
+            <Stack.Screen name="media/[id]" options={{ headerShown: true, title: 'Sermon' }} />
+            <Stack.Screen name="media/albums/[id]" options={{ headerShown: true, title: 'Album' }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </AuthGate>

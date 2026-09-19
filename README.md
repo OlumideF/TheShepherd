@@ -27,6 +27,7 @@ Congregation-first member app (Expo + Supabase). Source of truth: `PROJECT_SPEC.
    - Run migrations in order (SQL Editor):
      1. `supabase/migrations/20260319000000_phase1_foundation.sql`
      2. `supabase/migrations/20260319010000_phase2_members.sql`
+     3. `supabase/migrations/20260319020000_phase3_media.sql`
    - To promote yourself to admin after first signup:
      ```sql
      update public.profiles set role = 'admin' where email = 'you@example.com';
@@ -58,6 +59,7 @@ app/                 # expo-router screens
 components/ui/       # shared design-system primitives
 features/auth/       # auth hooks / session
 features/members/    # directory, privacy, households
+features/media/      # sermons, live, audio, photo albums
 lib/supabase/        # client, storage, types
 constants/theme.ts   # design tokens
 supabase/migrations/ # Postgres + RLS
@@ -69,4 +71,4 @@ See [DECISIONS.md](./DECISIONS.md).
 
 ## Phases
 
-Work phase-by-phase per `PROJECT_SPEC.md`. Phase 1 = foundation. Phase 2 = members.
+Work phase-by-phase per `PROJECT_SPEC.md`. Phase 1 = foundation. Phase 2 = members. Phase 3 = media.
