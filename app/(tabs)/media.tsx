@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,13 +11,18 @@ import {
 import { useRouter, type Href } from 'expo-router';
 
 import { AppText } from '@/components/ui/AppText';
+import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
+import { SocialLinks } from '@/components/ui/SocialLinks';
 import { TextField } from '@/components/ui/TextField';
+import { brand } from '@/constants/brand';
 import { colors, radii, spacing } from '@/constants/theme';
 import { MediaCard } from '@/features/media/components/MediaCard';
+import { YoutubeLiveEmbed } from '@/features/media/components/YoutubeLiveEmbed';
 import { YoutubePlayer } from '@/features/media/components/YoutubePlayer';
 import { useLiveMedia, useMediaArchive } from '@/features/media/hooks/useMedia';
 import { usePhotoAlbums } from '@/features/media/hooks/usePhotoAlbums';
+import { isWithinSundayLiveWindow } from '@/features/media/utils/liveSchedule';
 
 type TabKey = 'sermons' | 'live' | 'photos';
 
@@ -143,6 +149,7 @@ function SermonsPane() {
 function LivePane() {
   const router = useRouter();
   const { data, isLoading, isError, error, refetch } = useLiveMedia();
+  const inSundayWindow = isWithinSundayLiveWindow();
 
   if (isLoading) {
     return <ActivityIndicator color={colors.accent} style={styles.loader} />;
@@ -158,28 +165,58 @@ function LivePane() {
     );
   }
 
-  if (!data?.youtube_id) {
+  // Programmed live media_item takes priority (future scheduling).
+  if (data?.youtube_id) {
     return (
-      <View style={styles.empty}>
-        <AppText variant="bodyStrong">Nothing live right now</AppText>
+      <ScrollView contentContainerStyle={styles.live}>
+        <AppText variant="heading">{data.title}</AppText>
+        {data.speaker ? <AppText muted>{data.speaker}</AppText> : null}
+        <YoutubePlayer videoId={data.youtube_id} height={240} />
+        <Pressable onPress={() => router.push(`/media/${data.id}` as Href)}>
+          <AppText color={colors.accent}>Open full sermon page</AppText>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  // Sunday window: embed the church channel live stream.
+  if (inSundayWindow) {
+    return (
+      <ScrollView contentContainerStyle={styles.live}>
+        <AppText variant="heading">Sunday live service</AppText>
         <AppText muted>
-          When a service is live, it will play here. Afterward it moves into the
-          sermon archive automatically when the admin updates the YouTube id.
+          Streaming from {brand.social.youtube.handle}. If the embed is empty,
+          the stream may not have started yet.
         </AppText>
+        <YoutubeLiveEmbed channelId={brand.social.youtube.channelId} height={240} />
+        <Button
+          label="Open on YouTube"
+          variant="secondary"
+          onPress={() => Linking.openURL(brand.social.youtube.liveUrl)}
+        />
         <Pressable onPress={() => refetch()}>
           <AppText color={colors.accent}>Refresh</AppText>
         </Pressable>
-      </View>
+      </ScrollView>
     );
   }
 
   return (
     <ScrollView contentContainerStyle={styles.live}>
-      <AppText variant="heading">{data.title}</AppText>
-      {data.speaker ? <AppText muted>{data.speaker}</AppText> : null}
-      <YoutubePlayer videoId={data.youtube_id} height={240} />
-      <Pressable onPress={() => router.push(`/media/${data.id}` as Href)}>
-        <AppText color={colors.accent}>Open full sermon page</AppText>
+      <AppText variant="heading">Nothing live right now</AppText>
+      <AppText muted>
+        We typically go live {brand.liveSchedule.label}. After the service,
+        recordings appear in Sermons when published.
+      </AppText>
+      <Button
+        label="Watch on YouTube"
+        variant="secondary"
+        onPress={() => Linking.openURL(brand.social.youtube.url)}
+      />
+      <AppText variant="bodyStrong">Follow us</AppText>
+      <SocialLinks />
+      <Pressable onPress={() => refetch()}>
+        <AppText color={colors.accent}>Check for a programmed stream</AppText>
       </Pressable>
     </ScrollView>
   );

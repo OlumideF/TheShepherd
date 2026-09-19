@@ -41,7 +41,11 @@ Product and technical choices that are not obvious from the code. Append; do not
 | Photos | `photo_albums` + `photos` + `photo-albums` bucket | Event link nullable until Phase 4. |
 | Admin publishing | Deferred to Phase 7 | Members can view; empty states until content exists. |
 | Audio UI | Show player only when `audio_status = ready` | Spec: no dead button / coming soon. |
+| YouTube channel | `@rccgauburn` / `UCHkhJ6h23vTbUW8SZMW5OvQ` | Default Live embed via channel `live_stream`. |
+| Live window | Sundays 8:40–12:00 America/Chicago | Typical service window; programmed `is_live` rows override later. |
+| Social | Instagram `@rccgauburn`, Facebook page id `61555660897851` | Shown on Home + Live idle state. |
 
+## 2026-03-19 — Web hosting (Vercel)
 
 | Decision | Choice | Why |
 |---|---|---|
