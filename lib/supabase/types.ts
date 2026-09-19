@@ -3,6 +3,11 @@ export type MembershipStatus = 'visitor' | 'pending' | 'active' | 'inactive';
 export type OnboardingIntent = 'visitor' | 'member';
 export type AudioStatus = 'none' | 'processing' | 'ready';
 export type MediaKind = 'sermon' | 'event' | 'other';
+export type EventKind = 'service' | 'group' | 'special' | 'other';
+export type RsvpStatus = 'going' | 'maybe' | 'not_going' | 'waitlisted';
+export type ReminderStatus = 'pending' | 'sent' | 'cancelled';
+export type GroupMemberStatus = 'pending' | 'approved';
+export type GroupMemberRole = 'member' | 'leader';
 
 export type Profile = {
   id: string;
@@ -79,6 +84,82 @@ export type Photo = {
   storage_path: string;
   caption: string | null;
   sort_order: number;
+  created_at: string;
+};
+
+export type ChurchGroup = {
+  id: string;
+  name: string;
+  description: string | null;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type GroupMember = {
+  id: string;
+  group_id: string;
+  profile_id: string;
+  status: GroupMemberStatus;
+  role_in_group: GroupMemberRole;
+  created_at: string;
+};
+
+export type ChurchEvent = {
+  id: string;
+  title: string;
+  description: string | null;
+  kind: EventKind;
+  location: string | null;
+  starts_at: string;
+  ends_at: string | null;
+  timezone: string;
+  rrule: string | null;
+  capacity: number | null;
+  group_id: string | null;
+  created_by: string | null;
+  reminder_offsets_minutes: number[];
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EventRsvp = {
+  id: string;
+  event_id: string;
+  profile_id: string;
+  occurrence_start: string;
+  status: RsvpStatus;
+  waitlist_position: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type VolunteerSlot = {
+  id: string;
+  event_id: string;
+  title: string;
+  description: string | null;
+  slots_needed: number;
+  created_at: string;
+};
+
+export type VolunteerSignup = {
+  id: string;
+  slot_id: string;
+  profile_id: string;
+  occurrence_start: string;
+  created_at: string;
+};
+
+export type EventReminderQueueItem = {
+  id: string;
+  event_id: string;
+  profile_id: string;
+  occurrence_start: string;
+  fire_at: string;
+  offset_minutes: number;
+  status: ReminderStatus;
   created_at: string;
 };
 
@@ -209,7 +290,15 @@ export type Database = {
           published?: boolean;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'photo_albums_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       photos: {
         Row: Photo;
@@ -237,6 +326,185 @@ export type Database = {
           },
         ];
       };
+      groups: {
+        Row: ChurchGroup;
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          name?: string;
+          description?: string | null;
+          published?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      group_members: {
+        Row: GroupMember;
+        Insert: {
+          id?: string;
+          group_id: string;
+          profile_id: string;
+          status?: GroupMemberStatus;
+          role_in_group?: GroupMemberRole;
+          created_at?: string;
+        };
+        Update: {
+          status?: GroupMemberStatus;
+          role_in_group?: GroupMemberRole;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'group_members_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'groups';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      events: {
+        Row: ChurchEvent;
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          kind?: EventKind;
+          location?: string | null;
+          starts_at: string;
+          ends_at?: string | null;
+          timezone?: string;
+          rrule?: string | null;
+          capacity?: number | null;
+          group_id?: string | null;
+          created_by?: string | null;
+          reminder_offsets_minutes?: number[];
+          published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          title?: string;
+          description?: string | null;
+          kind?: EventKind;
+          location?: string | null;
+          starts_at?: string;
+          ends_at?: string | null;
+          timezone?: string;
+          rrule?: string | null;
+          capacity?: number | null;
+          group_id?: string | null;
+          reminder_offsets_minutes?: number[];
+          published?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'events_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'groups';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      event_rsvps: {
+        Row: EventRsvp;
+        Insert: {
+          id?: string;
+          event_id: string;
+          profile_id: string;
+          occurrence_start: string;
+          status: RsvpStatus;
+          waitlist_position?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          status?: RsvpStatus;
+          waitlist_position?: number | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'event_rsvps_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      volunteer_slots: {
+        Row: VolunteerSlot;
+        Insert: {
+          id?: string;
+          event_id: string;
+          title: string;
+          description?: string | null;
+          slots_needed?: number;
+          created_at?: string;
+        };
+        Update: {
+          title?: string;
+          description?: string | null;
+          slots_needed?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'volunteer_slots_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      volunteer_signups: {
+        Row: VolunteerSignup;
+        Insert: {
+          id?: string;
+          slot_id: string;
+          profile_id: string;
+          occurrence_start: string;
+          created_at?: string;
+        };
+        Update: {
+          occurrence_start?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'volunteer_signups_slot_id_fkey';
+            columns: ['slot_id'];
+            isOneToOne: false;
+            referencedRelation: 'volunteer_slots';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      event_reminder_queue: {
+        Row: EventReminderQueueItem;
+        Insert: {
+          id?: string;
+          event_id: string;
+          profile_id: string;
+          occurrence_start: string;
+          fire_at: string;
+          offset_minutes: number;
+          status?: ReminderStatus;
+          created_at?: string;
+        };
+        Update: {
+          status?: ReminderStatus;
+          fire_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       member_directory: {
@@ -247,6 +515,18 @@ export type Database = {
     Functions: {
       is_admin: {
         Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_group_leader_role: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      leads_group: {
+        Args: { p_group_id: string };
+        Returns: boolean;
+      };
+      can_manage_event: {
+        Args: { p_event_id: string };
         Returns: boolean;
       };
       my_household_id: {
@@ -269,12 +549,32 @@ export type Database = {
         Args: Record<string, never>;
         Returns: undefined;
       };
+      upsert_event_rsvp: {
+        Args: {
+          p_event_id: string;
+          p_occurrence_start: string;
+          p_status: RsvpStatus;
+        };
+        Returns: EventRsvp;
+      };
+      toggle_volunteer_signup: {
+        Args: {
+          p_slot_id: string;
+          p_occurrence_start: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       user_role: UserRole;
       membership_status: MembershipStatus;
       audio_status: AudioStatus;
       media_kind: MediaKind;
+      event_kind: EventKind;
+      rsvp_status: RsvpStatus;
+      reminder_status: ReminderStatus;
+      group_member_status: GroupMemberStatus;
+      group_member_role: GroupMemberRole;
     };
     CompositeTypes: Record<string, never>;
   };

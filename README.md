@@ -28,9 +28,18 @@ Congregation-first member app (Expo + Supabase). Source of truth: `PROJECT_SPEC.
      1. `supabase/migrations/20260319000000_phase1_foundation.sql`
      2. `supabase/migrations/20260319010000_phase2_members.sql`
      3. `supabase/migrations/20260319020000_phase3_media.sql`
+     4. `supabase/migrations/20260319030000_phase4_events.sql`
    - To promote yourself to admin after first signup:
      ```sql
      update public.profiles set role = 'admin' where email = 'you@example.com';
+     ```
+   - Optional: seed a group and mark yourself leader (needed for group-leader event creates):
+     ```sql
+     insert into public.groups (name) values ('Youth Ministry') returning id;
+     -- use the returned id:
+     insert into public.group_members (group_id, profile_id, status, role_in_group)
+     values ('<group-uuid>', '<your-profile-uuid>', 'approved', 'leader');
+     update public.profiles set role = 'group_leader' where id = '<your-profile-uuid>';
      ```
 
 4. **Run**
@@ -54,12 +63,16 @@ Congregation-first member app (Expo + Supabase). Source of truth: `PROJECT_SPEC.
 app/                 # expo-router screens
   (auth)/            # sign-in / sign-up
   onboarding/        # new-member setup flow
-  (tabs)/            # Home, Directory, Events, Groups, Profile
+  (tabs)/            # Home, Directory, Media, Events, Groups, Profile
   member/[id].tsx    # directory member detail
+  media/             # sermon + album detail
+  events/            # event detail, create, edit
 components/ui/       # shared design-system primitives
 features/auth/       # auth hooks / session
 features/members/    # directory, privacy, households
 features/media/      # sermons, live, audio, photo albums
+features/events/     # calendar, RSVP, recurrence, volunteers
+features/events/     # calendar, RSVP, recurrence, volunteers
 lib/supabase/        # client, storage, types
 constants/theme.ts   # design tokens
 supabase/migrations/ # Postgres + RLS
@@ -71,4 +84,4 @@ See [DECISIONS.md](./DECISIONS.md).
 
 ## Phases
 
-Work phase-by-phase per `PROJECT_SPEC.md`. Phase 1 = foundation. Phase 2 = members. Phase 3 = media.
+Work phase-by-phase per `PROJECT_SPEC.md`. Phase 1 = foundation. Phase 2 = members. Phase 3 = media. Phase 4 = events.

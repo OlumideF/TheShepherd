@@ -45,6 +45,20 @@ Product and technical choices that are not obvious from the code. Append; do not
 | Live window | Sundays 8:40–12:00 America/Chicago | Typical service window; programmed `is_live` rows override later. |
 | Social | Instagram `@rccgauburn`, Facebook page id `61555660897851` | Shown on Home + Live idle state. |
 
+## 2026-09-19 — Phase 4 events
+
+| Decision | Choice | Why |
+|---|---|---|
+| Event creators | **Admins + group leaders (group-scoped)** | Leaders must attach `group_id` they lead; admins can create church-wide events. |
+| Calendar UI | **Full month grid first** | Spec choice; day list under the grid for selected date. |
+| RSVP model | `going` / `maybe` / `not_going` (+ auto `waitlisted`) | Capacity counts `going`; over-capacity → waitlist with auto-promote on cancel. |
+| Recurrence | **Full iCal RRULE** (`rrule` package, client expand) | One DB row per series; RSVPs keyed by `occurrence_start`. |
+| Reminders | Offsets on event + `event_reminder_queue` | Rows scheduled on Going RSVP; Expo push send deferred to Phase 5. |
+| Waitlist | Auto-promote next on cancel | Frees a seat without admin action. |
+| Timezone | **America/Chicago** | Matches live service window. |
+| Groups seam | Minimal `groups` + `group_members` | Needed for leader-scoped creates before Phase 6 browse/join UI. |
+| Photo albums | FK `photo_albums.event_id` → `events` | Closes Phase 3 nullable seam. |
+
 ## 2026-03-19 — Web hosting (Vercel)
 
 | Decision | Choice | Why |
