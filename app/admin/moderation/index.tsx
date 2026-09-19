@@ -29,8 +29,8 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 type TabKey = 'announcements' | 'comments' | 'prayers' | 'messages';
 
 export default function ModerationScreen() {
-  const { profile } = useAuth();
-  const allowed = canAccessAdminHub(profile);
+  const { profile, user } = useAuth();
+  const allowed = canAccessAdminHub(profile, user?.email);
   const [tab, setTab] = useState<TabKey>('announcements');
 
   const announcements = useModerationAnnouncements(allowed && tab === 'announcements');

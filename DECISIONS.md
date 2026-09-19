@@ -93,7 +93,7 @@ Product and technical choices that are not obvious from the code. Append; do not
 | Decision | Choice | Why |
 |---|---|---|
 | Entry | **Admin hub** from Profile (+ Media publish shortcuts) | Spec ask; keeps member tabs clean. |
-| Super admin | `rccgauburn@gmail.com` | Congregation owner; auto-promoted on signup; only they may grant `admin`. |
+| Super admin | `rccgauburn@gmail.com` | Congregation owner; JWT + profile email; `ensure_super_admin` on login; only they may grant `admin`. Single idempotent Phase 7 SQL. |
 | Media / album writers | Admins + group leaders + `can_upload_media` flag | Spec ask; admins assign the flag on Roles screen. |
 | Audio flow | YouTube first, then attach/replace MP3 on same `media_item` | Spec two-step lifecycle; `audio_status = ready` on success. |
 | Moderation | Delete announcements, comments, prayers, group messages | Spec ask: all four. |

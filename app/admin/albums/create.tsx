@@ -12,10 +12,10 @@ import { canPublishMedia } from '@/features/admin/utils/permissions';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function CreateAlbumScreen() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const router = useRouter();
   const create = useCreateAlbum();
-  const allowed = canPublishMedia(profile);
+  const allowed = canPublishMedia(profile, user?.email);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

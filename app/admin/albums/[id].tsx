@@ -25,9 +25,9 @@ import { usePhotoAlbum } from '@/features/media/hooks/usePhotoAlbums';
 
 export default function EditAlbumScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const router = useRouter();
-  const allowed = canPublishMedia(profile);
+  const allowed = canPublishMedia(profile, user?.email);
   const { data, isLoading, refetch } = usePhotoAlbum(id);
   const update = useUpdateAlbum();
   const removeAlbum = useDeleteAlbum();

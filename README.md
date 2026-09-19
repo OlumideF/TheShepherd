@@ -33,12 +33,13 @@ Congregation-first member app (Expo + Supabase). Source of truth: `PROJECT_SPEC.
      4. `supabase/migrations/20260319030000_phase4_events.sql`
      5. `supabase/migrations/20260319040000_phase5_communication.sql`
      6. `supabase/migrations/20260319050000_phase6_groups.sql`
-     7. `supabase/migrations/20260319060000_phase7_admin.sql`
+     7. `supabase/migrations/20260319060000_phase7_admin.sql` (idempotent; safe to re-run)
    - To promote yourself to admin after first signup:
      ```sql
      update public.profiles set role = 'admin' where email = 'you@example.com';
      ```
-   - The account `rccgauburn@gmail.com` is the **super admin** (auto-promoted by Phase 7 migration / signup).
+   - The account `rccgauburn@gmail.com` is the **super admin** (auto-promoted by Phase 7 migration / signup / login sync).
+     After running Phase 7, sign out and back in if the hub is not visible yet.
    - Optional: seed a group and mark yourself leader (needed for group-leader event/broadcast creates):
      ```sql
      insert into public.groups (name) values ('Youth Ministry') returning id;

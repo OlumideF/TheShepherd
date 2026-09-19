@@ -19,6 +19,9 @@ import { Link, type Href } from 'expo-router';
 
 export default function ProfileScreen() {
   const { profile, user, signOut, refreshProfile, isConfigured } = useAuth();
+  const authEmail = user?.email ?? profile?.email;
+  const showAdminHub = canAccessAdminHub(profile, authEmail);
+  const showPublish = canPublishMedia(profile, authEmail);
   const {
     household,
     members,
@@ -125,18 +128,18 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {(canAccessAdminHub(profile) || canPublishMedia(profile)) && (
+        {(showAdminHub || showPublish) && (
           <Section title="Admin tools">
-            {canAccessAdminHub(profile) ? (
+            {showAdminHub ? (
               <Link href={'/admin' as Href} asChild>
                 <Button label="Open admin hub" />
               </Link>
             ) : null}
-            {canPublishMedia(profile) ? (
+            {showPublish ? (
               <Link href={'/admin/media' as Href} asChild>
                 <Button
                   label="Publish media"
-                  variant={canAccessAdminHub(profile) ? 'secondary' : 'primary'}
+                  variant={showAdminHub ? 'secondary' : 'primary'}
                 />
               </Link>
             ) : null}

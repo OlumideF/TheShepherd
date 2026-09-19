@@ -28,14 +28,15 @@ const MEMBERSHIP_OPTIONS: MembershipStatus[] = [
 
 export default function AdminMemberDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { profile: actor } = useAuth();
-  const allowed = canAccessAdminHub(actor);
+  const { profile: actor, user } = useAuth();
+  const authEmail = user?.email ?? actor?.email;
+  const allowed = canAccessAdminHub(actor, authEmail);
   const { data: member, isLoading } = useAdminMember(id, allowed);
   const update = useUpdateMemberAdmin();
 
   const roles = useMemo(
-    () => assignableRoles(actor, member),
-    [actor, member],
+    () => assignableRoles(actor, member, authEmail),
+    [actor, member, authEmail],
   );
 
   const [role, setRole] = useState<UserRole>('member');
@@ -72,7 +73,9 @@ export default function AdminMemberDetailScreen() {
 
   const lockedSuper = isSuperAdminEmail(member.email);
   const isTargetAdminLocked =
-    member.role === 'admin' && !isSuperAdmin(actor) && member.id !== actor?.id;
+    member.role === 'admin' &&
+    !isSuperAdmin(actor, authEmail) &&
+    member.id !== actor?.id;
 
   async function onSave() {
     if (!id) return;
@@ -125,43 +128,43 @@ export default function AdminMemberDetailScreen() {
               key={s}
               label={s}
               active={membershipStatus === s}
-              disabled={isTargetAdminLocked && !isSuperAdmin(actor)}
-              onPress={() => setMembershipStatus(s)}
+                  disabled={isTargetAdminLocked && !isSuperAdmin(actor, authEmail)}
+                  onPress={() => setMembershipStatus(s)}
+                />
+              ))}
+            </View>
+
+            <AppText variant="heading">Media upload</AppText>
+            <AppText muted variant="caption">
+              Admins and group leaders can always upload. Toggle grants upload to
+              regular members.
+            </AppText>
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: canUpload || lockedSuper }}
+              disabled={lockedSuper || isTargetAdminLocked}
+              onPress={() => setCanUpload((v) => !v)}
+              style={[
+                styles.toggle,
+                (canUpload || lockedSuper) && styles.toggleOn,
+              ]}
+            >
+              <AppText variant="bodyStrong">
+                {canUpload || lockedSuper
+                  ? 'Can upload media & albums'
+                  : 'Cannot upload (unless leader/admin)'}
+              </AppText>
+            </Pressable>
+
+            {error ? <AppText color={colors.danger}>{error}</AppText> : null}
+            {message ? <AppText color={colors.success}>{message}</AppText> : null}
+
+            <Button
+              label="Save"
+              loading={update.isPending}
+              disabled={isTargetAdminLocked && !isSuperAdmin(actor, authEmail)}
+              onPress={onSave}
             />
-          ))}
-        </View>
-
-        <AppText variant="heading">Media upload</AppText>
-        <AppText muted variant="caption">
-          Admins and group leaders can always upload. Toggle grants upload to
-          regular members.
-        </AppText>
-        <Pressable
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: canUpload || lockedSuper }}
-          disabled={lockedSuper || isTargetAdminLocked}
-          onPress={() => setCanUpload((v) => !v)}
-          style={[
-            styles.toggle,
-            (canUpload || lockedSuper) && styles.toggleOn,
-          ]}
-        >
-          <AppText variant="bodyStrong">
-            {canUpload || lockedSuper
-              ? 'Can upload media & albums'
-              : 'Cannot upload (unless leader/admin)'}
-          </AppText>
-        </Pressable>
-
-        {error ? <AppText color={colors.danger}>{error}</AppText> : null}
-        {message ? <AppText color={colors.success}>{message}</AppText> : null}
-
-        <Button
-          label="Save"
-          loading={update.isPending}
-          disabled={isTargetAdminLocked && !isSuperAdmin(actor)}
-          onPress={onSave}
-        />
       </ScrollView>
     </Screen>
   );

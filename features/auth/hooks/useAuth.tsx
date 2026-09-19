@@ -33,6 +33,14 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 async function fetchProfile(userId: string): Promise<Profile | null> {
+  // Promote rccgauburn@gmail.com if signed in (no-ops for others / if RPC missing)
+  const { data: ensured, error: ensureError } = await supabase.rpc(
+    'ensure_super_admin',
+  );
+  if (!ensureError && ensured) {
+    return ensured as Profile;
+  }
+
   const { data, error } = await supabase
     .from('profiles')
     .select('*')

@@ -18,9 +18,9 @@ import { useMediaItem } from '@/features/media/hooks/useMedia';
 
 export default function EditMediaScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const router = useRouter();
-  const allowed = canPublishMedia(profile);
+  const allowed = canPublishMedia(profile, user?.email);
   const { data: item, isLoading, refetch } = useMediaItem(id);
   const update = useUpdateMediaItem();
   const remove = useDeleteMediaItem();

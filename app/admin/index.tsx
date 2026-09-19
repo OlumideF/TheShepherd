@@ -16,8 +16,8 @@ import { canAccessAdminHub } from '@/features/admin/utils/permissions';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function AdminHubScreen() {
-  const { profile } = useAuth();
-  const allowed = canAccessAdminHub(profile);
+  const { profile, user } = useAuth();
+  const allowed = canAccessAdminHub(profile, user?.email);
   const { data, isLoading, error } = useAdminDashboard(allowed);
 
   if (!allowed) {

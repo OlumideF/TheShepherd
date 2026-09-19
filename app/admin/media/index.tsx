@@ -16,9 +16,9 @@ import { canPublishMedia } from '@/features/admin/utils/permissions';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function AdminMediaListScreen() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const router = useRouter();
-  const allowed = canPublishMedia(profile);
+  const allowed = canPublishMedia(profile, user?.email);
   const { data = [], isLoading, error } = useAdminMediaList(allowed);
 
   if (!allowed) {

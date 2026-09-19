@@ -911,6 +911,10 @@ export type Database = {
         Args: Record<string, never>;
         Returns: boolean;
       };
+      ensure_super_admin: {
+        Args: Record<string, never>;
+        Returns: Profile;
+      };
       can_upload_media: {
         Args: Record<string, never>;
         Returns: boolean;

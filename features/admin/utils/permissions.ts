@@ -4,15 +4,26 @@ export function isSuperAdminEmail(email: string | null | undefined): boolean {
   return (email ?? '').trim().toLowerCase() === SUPER_ADMIN_EMAIL;
 }
 
-export function isSuperAdmin(profile: Profile | null | undefined): boolean {
-  return isSuperAdminEmail(profile?.email);
+/** True if profile email or auth session email is the congregation super admin. */
+export function isSuperAdmin(
+  profile: Profile | null | undefined,
+  authEmail?: string | null,
+): boolean {
+  return isSuperAdminEmail(profile?.email) || isSuperAdminEmail(authEmail);
 }
 
-export function canAccessAdminHub(profile: Profile | null | undefined): boolean {
-  return profile?.role === 'admin';
+export function canAccessAdminHub(
+  profile: Profile | null | undefined,
+  authEmail?: string | null,
+): boolean {
+  return profile?.role === 'admin' || isSuperAdmin(profile, authEmail);
 }
 
-export function canPublishMedia(profile: Profile | null | undefined): boolean {
+export function canPublishMedia(
+  profile: Profile | null | undefined,
+  authEmail?: string | null,
+): boolean {
+  if (isSuperAdmin(profile, authEmail)) return true;
   if (!profile) return false;
   return (
     profile.role === 'admin' ||
@@ -21,20 +32,24 @@ export function canPublishMedia(profile: Profile | null | undefined): boolean {
   );
 }
 
-export function canAssignAdminRole(actor: Profile | null | undefined): boolean {
-  return isSuperAdmin(actor);
+export function canAssignAdminRole(
+  actor: Profile | null | undefined,
+  authEmail?: string | null,
+): boolean {
+  return isSuperAdmin(actor, authEmail);
 }
 
 /** Roles the actor may assign to a target profile. */
 export function assignableRoles(
   actor: Profile | null | undefined,
   target: Profile | null | undefined,
+  authEmail?: string | null,
 ): UserRole[] {
-  if (!actor || actor.role !== 'admin') return [];
+  if (!actor || !canAccessAdminHub(actor, authEmail)) return [];
   if (isSuperAdmin(target) || (target && isSuperAdminEmail(target.email))) {
     return ['admin'];
   }
-  if (isSuperAdmin(actor)) {
+  if (isSuperAdmin(actor, authEmail)) {
     return ['member', 'group_leader', 'admin'];
   }
   if (target?.role === 'admin') {

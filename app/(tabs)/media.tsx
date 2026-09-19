@@ -29,8 +29,8 @@ import { isWithinSundayLiveWindow } from '@/features/media/utils/liveSchedule';
 type TabKey = 'sermons' | 'live' | 'photos';
 
 export default function MediaScreen() {
-  const { profile } = useAuth();
-  const canPublish = canPublishMedia(profile);
+  const { profile, user } = useAuth();
+  const canPublish = canPublishMedia(profile, user?.email);
   const [tab, setTab] = useState<TabKey>('sermons');
 
   return (

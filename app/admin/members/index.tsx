@@ -17,8 +17,8 @@ import { canAccessAdminHub } from '@/features/admin/utils/permissions';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function AdminMembersScreen() {
-  const { profile } = useAuth();
-  const allowed = canAccessAdminHub(profile);
+  const { profile, user } = useAuth();
+  const allowed = canAccessAdminHub(profile, user?.email);
   const [search, setSearch] = useState('');
   const { data = [], isLoading, error } = useAdminMembers(allowed, search);
 
