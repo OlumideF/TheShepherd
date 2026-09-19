@@ -59,6 +59,22 @@ Product and technical choices that are not obvious from the code. Append; do not
 | Groups seam | Minimal `groups` + `group_members` | Needed for leader-scoped creates before Phase 6 browse/join UI. |
 | Photo albums | FK `photo_albums.event_id` → `events` | Closes Phase 3 nullable seam. |
 
+## 2026-09-19 — Phase 5 communication
+
+| Decision | Choice | Why |
+|---|---|---|
+| Announcement writers | **Admins only** | Matches Phase 7 admin seam; members react + comment. |
+| Reactions | Fixed emoji set 🙏❤️👍🎉🙌; one row per user/emoji | Spec ask; simple toggle via unique constraint. |
+| Comments | Collapsible under each announcement | Spec ask; flat thread for v1. |
+| Broadcast writers | **Admins + group leaders** (group-scoped) | Leaders reach their roster; admins any group. |
+| Prayer authors | Any signed-in member | Spec ask. |
+| Prayer visibility | `public` / `group_only` (+`group_id`) / `private` (author only) | Private = author only; group_only = approved members. |
+| Author labels | Snapshot `author_display_name` on insert | Profiles RLS blocks non-directory joins. |
+| Notification categories | announcements, events, broadcasts, prayer | Per-category opt-out on Profile. |
+| Push delivery | Token register + in-app inbox + `send-push` Edge Function | Best fit for Expo + Supabase without inventing a second backend. |
+| Event reminders | `materialize_due_event_reminders` → notifications → Expo | Closes Phase 4 queue; cron or post-publish invoke. |
+| Home | Announcements feed primary | Replaces Phase 1 placeholder cards. |
+
 ## 2026-03-19 — Web hosting (Vercel)
 
 | Decision | Choice | Why |

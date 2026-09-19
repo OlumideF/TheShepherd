@@ -122,6 +122,10 @@ export default function RootLayout() {
             <Stack.Screen name="events/create" options={{ headerShown: true, title: 'New event' }} />
             <Stack.Screen name="events/[id]/index" options={{ headerShown: true, title: 'Event' }} />
             <Stack.Screen name="events/[id]/edit" options={{ headerShown: true, title: 'Edit event' }} />
+            <Stack.Screen name="prayer/index" options={{ headerShown: true, title: 'Prayer wall' }} />
+            <Stack.Screen name="notifications/index" options={{ headerShown: true, title: 'Inbox' }} />
+            <Stack.Screen name="announcements/create" options={{ headerShown: true, title: 'Announcement' }} />
+            <Stack.Screen name="broadcasts/create" options={{ headerShown: true, title: 'Broadcast' }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </AuthGate>

@@ -9,6 +9,7 @@ import { colors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { PrivacyToggles } from '@/features/members/components/PrivacyToggles';
 import { useHousehold } from '@/features/members/hooks/useHousehold';
+import { NotificationPrefsPanel } from '@/features/communication/components/NotificationPrefsPanel';
 import { supabase } from '@/lib/supabase/client';
 
 export default function ProfileScreen() {
@@ -157,6 +158,12 @@ export default function ProfileScreen() {
             }}
           />
         </Section>
+
+        {user?.id ? (
+          <Section title="Notifications">
+            <NotificationPrefsPanel profileId={user.id} />
+          </Section>
+        ) : null}
 
         <Section title="Household">
           {household ? (

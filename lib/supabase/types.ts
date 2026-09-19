@@ -8,6 +8,13 @@ export type RsvpStatus = 'going' | 'maybe' | 'not_going' | 'waitlisted';
 export type ReminderStatus = 'pending' | 'sent' | 'cancelled';
 export type GroupMemberStatus = 'pending' | 'approved';
 export type GroupMemberRole = 'member' | 'leader';
+export type PrayerVisibility = 'public' | 'group_only' | 'private';
+export type NotificationCategory =
+  | 'announcements'
+  | 'events'
+  | 'broadcasts'
+  | 'prayer';
+export type PushDeliveryStatus = 'pending' | 'sent' | 'skipped' | 'failed';
 
 export type Profile = {
   id: string;
@@ -160,6 +167,86 @@ export type EventReminderQueueItem = {
   fire_at: string;
   offset_minutes: number;
   status: ReminderStatus;
+  created_at: string;
+};
+
+export type Announcement = {
+  id: string;
+  title: string;
+  body: string;
+  author_id: string | null;
+  published: boolean;
+  published_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AnnouncementReaction = {
+  id: string;
+  announcement_id: string;
+  profile_id: string;
+  emoji: string;
+  created_at: string;
+};
+
+export type AnnouncementComment = {
+  id: string;
+  announcement_id: string;
+  author_id: string;
+  author_display_name: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PrayerRequest = {
+  id: string;
+  author_id: string;
+  author_display_name: string | null;
+  body: string;
+  visibility: PrayerVisibility;
+  is_anonymous: boolean;
+  group_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type NotificationPreferences = {
+  profile_id: string;
+  announcements: boolean;
+  events: boolean;
+  broadcasts: boolean;
+  prayer: boolean;
+  updated_at: string;
+};
+
+export type PushToken = {
+  id: string;
+  profile_id: string;
+  token: string;
+  platform: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Broadcast = {
+  id: string;
+  title: string;
+  body: string;
+  group_id: string;
+  author_id: string | null;
+  created_at: string;
+};
+
+export type AppNotification = {
+  id: string;
+  profile_id: string;
+  category: NotificationCategory;
+  title: string;
+  body: string;
+  data: Record<string, unknown>;
+  read_at: string | null;
+  push_status: PushDeliveryStatus;
   created_at: string;
 };
 
@@ -505,6 +592,185 @@ export type Database = {
         };
         Relationships: [];
       };
+      announcements: {
+        Row: Announcement;
+        Insert: {
+          id?: string;
+          title: string;
+          body: string;
+          author_id?: string | null;
+          published?: boolean;
+          published_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          title?: string;
+          body?: string;
+          published?: boolean;
+          published_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      announcement_reactions: {
+        Row: AnnouncementReaction;
+        Insert: {
+          id?: string;
+          announcement_id: string;
+          profile_id: string;
+          emoji: string;
+          created_at?: string;
+        };
+        Update: {
+          emoji?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'announcement_reactions_announcement_id_fkey';
+            columns: ['announcement_id'];
+            isOneToOne: false;
+            referencedRelation: 'announcements';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      announcement_comments: {
+        Row: AnnouncementComment;
+        Insert: {
+          id?: string;
+          announcement_id: string;
+          author_id: string;
+          author_display_name?: string | null;
+          body: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          body?: string;
+          author_display_name?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'announcement_comments_announcement_id_fkey';
+            columns: ['announcement_id'];
+            isOneToOne: false;
+            referencedRelation: 'announcements';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      prayer_requests: {
+        Row: PrayerRequest;
+        Insert: {
+          id?: string;
+          author_id: string;
+          author_display_name?: string | null;
+          body: string;
+          visibility?: PrayerVisibility;
+          is_anonymous?: boolean;
+          group_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          body?: string;
+          author_display_name?: string | null;
+          visibility?: PrayerVisibility;
+          is_anonymous?: boolean;
+          group_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'prayer_requests_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'groups';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      notification_preferences: {
+        Row: NotificationPreferences;
+        Insert: {
+          profile_id: string;
+          announcements?: boolean;
+          events?: boolean;
+          broadcasts?: boolean;
+          prayer?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          announcements?: boolean;
+          events?: boolean;
+          broadcasts?: boolean;
+          prayer?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      push_tokens: {
+        Row: PushToken;
+        Insert: {
+          id?: string;
+          profile_id: string;
+          token: string;
+          platform?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          token?: string;
+          platform?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      broadcasts: {
+        Row: Broadcast;
+        Insert: {
+          id?: string;
+          title: string;
+          body: string;
+          group_id: string;
+          author_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          title?: string;
+          body?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'broadcasts_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'groups';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      notifications: {
+        Row: AppNotification;
+        Insert: {
+          id?: string;
+          profile_id: string;
+          category: NotificationCategory;
+          title: string;
+          body: string;
+          data?: Record<string, unknown>;
+          read_at?: string | null;
+          push_status?: PushDeliveryStatus;
+          created_at?: string;
+        };
+        Update: {
+          read_at?: string | null;
+          push_status?: PushDeliveryStatus;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       member_directory: {
@@ -519,6 +785,10 @@ export type Database = {
       };
       is_group_leader_role: {
         Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_approved_group_member: {
+        Args: { p_group_id: string };
         Returns: boolean;
       };
       leads_group: {
@@ -564,6 +834,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      materialize_due_event_reminders: {
+        Args: { p_limit?: number };
+        Returns: number;
+      };
     };
     Enums: {
       user_role: UserRole;
@@ -575,6 +849,9 @@ export type Database = {
       reminder_status: ReminderStatus;
       group_member_status: GroupMemberStatus;
       group_member_role: GroupMemberRole;
+      prayer_visibility: PrayerVisibility;
+      notification_category: NotificationCategory;
+      push_delivery_status: PushDeliveryStatus;
     };
     CompositeTypes: Record<string, never>;
   };
