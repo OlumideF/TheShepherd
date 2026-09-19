@@ -17,6 +17,8 @@ type AuthContextValue = {
   user: User | null;
   profile: Profile | null;
   isLoading: boolean;
+  isProfileLoading: boolean;
+  needsOnboarding: boolean;
   isConfigured: boolean;
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
   signUpWithEmail: (
@@ -49,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
 
   const refreshProfile = useCallback(async () => {
     if (!session?.user?.id) {
@@ -86,18 +89,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!session?.user?.id) {
       setProfile(null);
+      setIsProfileLoading(false);
       return;
     }
 
     let cancelled = false;
+    setIsProfileLoading(true);
     fetchProfile(session.user.id).then((next) => {
-      if (!cancelled) setProfile(next);
+      if (!cancelled) {
+        setProfile(next);
+        setIsProfileLoading(false);
+      }
     });
 
     return () => {
       cancelled = true;
     };
   }, [session?.user?.id]);
+
+  const needsOnboarding = Boolean(session && profile && !profile.onboarding_completed_at);
 
   const signInWithEmail = useCallback(async (email: string, password: string) => {
     if (!isSupabaseConfigured) {
@@ -135,6 +145,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       profile,
       isLoading,
+      isProfileLoading,
+      needsOnboarding,
       isConfigured: isSupabaseConfigured,
       signInWithEmail,
       signUpWithEmail,
@@ -145,6 +157,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       profile,
       isLoading,
+      isProfileLoading,
+      needsOnboarding,
       signInWithEmail,
       signUpWithEmail,
       signOut,

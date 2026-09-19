@@ -1,7 +1,9 @@
 import { StyleSheet, View } from 'react-native';
+import { Link } from 'expo-router';
 
 import { AppText } from '@/components/ui/AppText';
 import { BrandMark } from '@/components/ui/BrandMark';
+import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -22,11 +24,14 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.card}>
-        <AppText variant="heading">Foundation ready</AppText>
+        <AppText variant="heading">Find people</AppText>
         <AppText muted style={styles.body}>
-          Phase 1 is in place: auth, profiles, roles, and this navigation shell.
-          Media, events, groups, and communication land in later phases.
+          Browse members who opted into the directory, or update your own
+          privacy and household from Profile.
         </AppText>
+        <Link href="/(tabs)/directory" asChild>
+          <Button label="Open directory" variant="secondary" />
+        </Link>
       </View>
     </Screen>
   );
@@ -48,5 +53,6 @@ const styles = StyleSheet.create({
   },
   body: {
     maxWidth: 420,
+    marginBottom: spacing.sm,
   },
 });

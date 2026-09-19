@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, type Href } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Fraunces_600SemiBold,
@@ -31,23 +31,42 @@ const queryClient = new QueryClient({
 });
 
 function AuthGate({ children }: { children: ReactNode }) {
-  const { session, isLoading } = useAuth();
+  const { session, isLoading, isProfileLoading, needsOnboarding } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     if (isLoading) return;
+    if (session && isProfileLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inOnboarding = segments[0] === 'onboarding';
 
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/sign-in');
-    } else if (session && inAuthGroup) {
+      return;
+    }
+
+    if (!session) return;
+
+    if (needsOnboarding && !inOnboarding) {
+      router.replace('/onboarding' as Href);
+      return;
+    }
+
+    if (!needsOnboarding && (inAuthGroup || inOnboarding)) {
       router.replace('/(tabs)');
     }
-  }, [session, isLoading, segments, router]);
+  }, [
+    session,
+    isLoading,
+    isProfileLoading,
+    needsOnboarding,
+    segments,
+    router,
+  ]);
 
-  if (isLoading) {
+  if (isLoading || (session && isProfileLoading)) {
     return (
       <View
         style={{
@@ -95,7 +114,9 @@ export default function RootLayout() {
             }}
           >
             <Stack.Screen name="(auth)" />
+            <Stack.Screen name="onboarding" />
             <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="member/[id]" options={{ headerShown: true, title: 'Member' }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </AuthGate>

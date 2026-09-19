@@ -76,9 +76,24 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="directory"
+        options={{
+          title: 'Directory',
+          tabBarIcon: ({ color }) => (
+            <TabIcon
+              ios="person.2.fill"
+              android="group"
+              web="people"
+              color={String(color)}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="media"
         options={{
           title: 'Media',
+          href: null,
           tabBarIcon: ({ color }) => (
             <TabIcon
               ios="play.rectangle.fill"
