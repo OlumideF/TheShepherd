@@ -32,10 +32,13 @@ Congregation-first member app (Expo + Supabase). Source of truth: `PROJECT_SPEC.
      3. `supabase/migrations/20260319020000_phase3_media.sql`
      4. `supabase/migrations/20260319030000_phase4_events.sql`
      5. `supabase/migrations/20260319040000_phase5_communication.sql`
+     6. `supabase/migrations/20260319050000_phase6_groups.sql`
+     7. `supabase/migrations/20260319060000_phase7_admin.sql`
    - To promote yourself to admin after first signup:
      ```sql
      update public.profiles set role = 'admin' where email = 'you@example.com';
      ```
+   - The account `rccgauburn@gmail.com` is the **super admin** (auto-promoted by Phase 7 migration / signup).
    - Optional: seed a group and mark yourself leader (needed for group-leader event/broadcast creates):
      ```sql
      insert into public.groups (name) values ('Youth Ministry') returning id;
@@ -81,16 +84,20 @@ app/                 # expo-router screens
   member/[id].tsx    # directory member detail
   media/             # sermon + album detail
   events/            # event detail, create, edit
+  groups/            # group detail + create
   prayer/            # prayer wall
   notifications/     # in-app inbox
-  announcements/     # admin create
+  announcements/     # admin / leader create
   broadcasts/        # admin / leader create
+  admin/             # Phase 7 hub: media, albums, roles, moderation
 components/ui/       # shared design-system primitives
+features/admin/      # admin hooks + permissions
 features/auth/       # auth hooks / session
 features/members/    # directory, privacy, households
 features/media/      # sermons, live, audio, photo albums
 features/events/     # calendar, RSVP, recurrence, volunteers
 features/communication/  # announcements, prayer, push, broadcasts
+features/groups/     # browse/join, roster, messages, attendance
 lib/supabase/        # client, storage, types
 constants/theme.ts   # design tokens
 supabase/migrations/ # Postgres + RLS
@@ -103,4 +110,4 @@ See [DECISIONS.md](./DECISIONS.md).
 
 ## Phases
 
-Work phase-by-phase per `PROJECT_SPEC.md`. Phase 5 = communication (announcements, push, broadcasts, prayer, preferences).
+Work phase-by-phase per `PROJECT_SPEC.md`. Phase 7 = admin (media publishing, albums, roles, moderation, dashboard).

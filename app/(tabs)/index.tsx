@@ -56,7 +56,7 @@ export default function HomeScreen() {
           </View>
           {(isAdmin || canBroadcast) && (
             <View style={styles.heroActions}>
-              {isAdmin ? (
+              {isAdmin || canBroadcast ? (
                 <Link href={'/announcements/create' as Href} asChild>
                   <Button label="New announcement" />
                 </Link>

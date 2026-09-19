@@ -126,6 +126,18 @@ export default function RootLayout() {
             <Stack.Screen name="notifications/index" options={{ headerShown: true, title: 'Inbox' }} />
             <Stack.Screen name="announcements/create" options={{ headerShown: true, title: 'Announcement' }} />
             <Stack.Screen name="broadcasts/create" options={{ headerShown: true, title: 'Broadcast' }} />
+            <Stack.Screen name="groups/create" options={{ headerShown: true, title: 'New group' }} />
+            <Stack.Screen name="groups/[id]" options={{ headerShown: true, title: 'Group' }} />
+            <Stack.Screen name="admin/index" options={{ headerShown: true, title: 'Admin' }} />
+            <Stack.Screen name="admin/media/index" options={{ headerShown: true, title: 'Publish media' }} />
+            <Stack.Screen name="admin/media/create" options={{ headerShown: true, title: 'New sermon' }} />
+            <Stack.Screen name="admin/media/[id]" options={{ headerShown: true, title: 'Edit sermon' }} />
+            <Stack.Screen name="admin/albums/index" options={{ headerShown: true, title: 'Photo albums' }} />
+            <Stack.Screen name="admin/albums/create" options={{ headerShown: true, title: 'New album' }} />
+            <Stack.Screen name="admin/albums/[id]" options={{ headerShown: true, title: 'Edit album' }} />
+            <Stack.Screen name="admin/members/index" options={{ headerShown: true, title: 'Roles & access' }} />
+            <Stack.Screen name="admin/members/[id]" options={{ headerShown: true, title: 'Edit member' }} />
+            <Stack.Screen name="admin/moderation/index" options={{ headerShown: true, title: 'Moderation' }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </AuthGate>

@@ -63,7 +63,7 @@ Product and technical choices that are not obvious from the code. Append; do not
 
 | Decision | Choice | Why |
 |---|---|---|
-| Announcement writers | **Admins only** | Matches Phase 7 admin seam; members react + comment. |
+| Announcement writers | **Admins + group leaders** (leaders group-scoped) | Phase 6: leaders post with `group_id`; admins church-wide or any group. |
 | Reactions | Fixed emoji set 🙏❤️👍🎉🙌; one row per user/emoji | Spec ask; simple toggle via unique constraint. |
 | Comments | Collapsible under each announcement | Spec ask; flat thread for v1. |
 | Broadcast writers | **Admins + group leaders** (group-scoped) | Leaders reach their roster; admins any group. |
@@ -74,6 +74,31 @@ Product and technical choices that are not obvious from the code. Append; do not
 | Push delivery | Token register + in-app inbox + `send-push` Edge Function | Best fit for Expo + Supabase without inventing a second backend. |
 | Event reminders | `materialize_due_event_reminders` → notifications → Expo | Closes Phase 4 queue; cron or post-publish invoke. |
 | Home | Announcements feed primary | Replaces Phase 1 placeholder cards. |
+
+## 2026-09-19 — Phase 6 groups
+
+| Decision | Choice | Why |
+|---|---|---|
+| Group creators | **Admins + group leaders** | Spec ask; creators auto-become roster leaders via `create_church_group`. |
+| Join model | **Approval by default**, toggle `requires_approval` | Leaders can open-join per group without a second join type. |
+| Messaging | **Broadcasts + in-group `group_messages`** | Push outreach stays on broadcasts; discussion lives on the group page. |
+| Attendance | **Standalone `group_meetings` + `group_attendance`** | Spec ask: meeting date/check-in, not tied to calendar events. |
+| Group content | **`announcements.group_id`** (nullable) | Same church-wide table; null = everyone, set = group-scoped RLS + fan-out. |
+| Leader promote | **Bump `profiles.role` → `group_leader`** | Via security-definer sync; no auto-demote when leadership ends. |
+| Roster visibility | **Approved members see full roster** | Leaders also see pending join requests. |
+| Display names | Snapshot `member_display_name` on join | Profiles RLS otherwise hides non-directory members. |
+
+## 2026-09-19 — Phase 7 admin
+
+| Decision | Choice | Why |
+|---|---|---|
+| Entry | **Admin hub** from Profile (+ Media publish shortcuts) | Spec ask; keeps member tabs clean. |
+| Super admin | `rccgauburn@gmail.com` | Congregation owner; auto-promoted on signup; only they may grant `admin`. |
+| Media / album writers | Admins + group leaders + `can_upload_media` flag | Spec ask; admins assign the flag on Roles screen. |
+| Audio flow | YouTube first, then attach/replace MP3 on same `media_item` | Spec two-step lifecycle; `audio_status = ready` on success. |
+| Moderation | Delete announcements, comments, prayers, group messages | Spec ask: all four. |
+| Roles UI | Set `role` + `membership_status` + upload flag | Spec ask. |
+| Dashboard | Member counts + upcoming events + 7d RSVPs/prayers/reactions | Spec ask: simple engagement mix. |
 
 ## 2026-03-19 — Web hosting (Vercel)
 

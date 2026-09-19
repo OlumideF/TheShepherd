@@ -73,6 +73,7 @@ export function AnnouncementCard({ announcement, profileId }: AnnouncementCardPr
     <View style={styles.card}>
       <AppText variant="caption" muted>
         {publishedLabel}
+        {announcement.group_id ? ' · Group' : ''}
       </AppText>
       <AppText variant="heading">{announcement.title}</AppText>
       <AppText>{announcement.body}</AppText>

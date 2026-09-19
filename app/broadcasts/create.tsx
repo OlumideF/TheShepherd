@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useRouter, type Href } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
@@ -16,6 +16,7 @@ import { colors, radii, spacing } from '@/constants/theme';
 export default function CreateBroadcastScreen() {
   const { profile, user } = useAuth();
   const router = useRouter();
+  const params = useLocalSearchParams<{ groupId?: string }>();
   const profileId = profile?.id ?? user?.id;
   const isAdmin = profile?.role === 'admin';
   const canBroadcast =
@@ -28,6 +29,12 @@ export default function CreateBroadcastScreen() {
   const [body, setBody] = useState('');
   const [groupId, setGroupId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof params.groupId === 'string' && params.groupId.length > 0) {
+      setGroupId(params.groupId);
+    }
+  }, [params.groupId]);
 
   async function onSubmit() {
     setError(null);

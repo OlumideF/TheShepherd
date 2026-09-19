@@ -39,13 +39,19 @@ export function useAnnouncements() {
 export function useCreateAnnouncement() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (args: { title: string; body: string; authorId: string }) => {
+    mutationFn: async (args: {
+      title: string;
+      body: string;
+      authorId: string;
+      groupId?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from('announcements')
         .insert({
           title: args.title.trim(),
           body: args.body.trim(),
           author_id: args.authorId,
+          group_id: args.groupId ?? null,
           published: true,
         })
         .select('*')

@@ -27,6 +27,7 @@ export type Profile = {
   photo_url: string | null;
   membership_status: MembershipStatus;
   role: UserRole;
+  can_upload_media: boolean;
   directory_visible: boolean;
   show_email: boolean;
   show_phone: boolean;
@@ -35,6 +36,8 @@ export type Profile = {
   created_at: string;
   updated_at: string;
 };
+
+export const SUPER_ADMIN_EMAIL = 'rccgauburn@gmail.com';
 
 export type DirectoryMember = {
   id: string;
@@ -99,6 +102,8 @@ export type ChurchGroup = {
   name: string;
   description: string | null;
   published: boolean;
+  requires_approval: boolean;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -109,6 +114,34 @@ export type GroupMember = {
   profile_id: string;
   status: GroupMemberStatus;
   role_in_group: GroupMemberRole;
+  member_display_name: string | null;
+  created_at: string;
+};
+
+export type GroupMessage = {
+  id: string;
+  group_id: string;
+  author_id: string;
+  author_display_name: string | null;
+  body: string;
+  created_at: string;
+};
+
+export type GroupMeeting = {
+  id: string;
+  group_id: string;
+  meeting_on: string;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+};
+
+export type GroupAttendance = {
+  id: string;
+  meeting_id: string;
+  profile_id: string;
+  present: boolean;
+  marked_by: string | null;
   created_at: string;
 };
 
@@ -175,6 +208,7 @@ export type Announcement = {
   title: string;
   body: string;
   author_id: string | null;
+  group_id: string | null;
   published: boolean;
   published_at: string;
   created_at: string;
@@ -261,6 +295,7 @@ type ProfileInsert = {
   photo_url?: string | null;
   membership_status?: MembershipStatus;
   role?: UserRole;
+  can_upload_media?: boolean;
   directory_visible?: boolean;
   show_email?: boolean;
   show_phone?: boolean;
@@ -280,6 +315,7 @@ type ProfileUpdate = {
   photo_url?: string | null;
   membership_status?: MembershipStatus;
   role?: UserRole;
+  can_upload_media?: boolean;
   directory_visible?: boolean;
   show_email?: boolean;
   show_phone?: boolean;
@@ -420,6 +456,8 @@ export type Database = {
           name: string;
           description?: string | null;
           published?: boolean;
+          requires_approval?: boolean;
+          created_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -427,6 +465,8 @@ export type Database = {
           name?: string;
           description?: string | null;
           published?: boolean;
+          requires_approval?: boolean;
+          created_by?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -439,11 +479,13 @@ export type Database = {
           profile_id: string;
           status?: GroupMemberStatus;
           role_in_group?: GroupMemberRole;
+          member_display_name?: string | null;
           created_at?: string;
         };
         Update: {
           status?: GroupMemberStatus;
           role_in_group?: GroupMemberRole;
+          member_display_name?: string | null;
         };
         Relationships: [
           {
@@ -451,6 +493,78 @@ export type Database = {
             columns: ['group_id'];
             isOneToOne: false;
             referencedRelation: 'groups';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      group_messages: {
+        Row: GroupMessage;
+        Insert: {
+          id?: string;
+          group_id: string;
+          author_id: string;
+          author_display_name?: string | null;
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          body?: string;
+          author_display_name?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'group_messages_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'groups';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      group_meetings: {
+        Row: GroupMeeting;
+        Insert: {
+          id?: string;
+          group_id: string;
+          meeting_on: string;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          meeting_on?: string;
+          notes?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'group_meetings_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'groups';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      group_attendance: {
+        Row: GroupAttendance;
+        Insert: {
+          id?: string;
+          meeting_id: string;
+          profile_id: string;
+          present?: boolean;
+          marked_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          present?: boolean;
+          marked_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'group_attendance_meeting_id_fkey';
+            columns: ['meeting_id'];
+            isOneToOne: false;
+            referencedRelation: 'group_meetings';
             referencedColumns: ['id'];
           },
         ];
@@ -599,6 +713,7 @@ export type Database = {
           title: string;
           body: string;
           author_id?: string | null;
+          group_id?: string | null;
           published?: boolean;
           published_at?: string;
           created_at?: string;
@@ -607,11 +722,20 @@ export type Database = {
         Update: {
           title?: string;
           body?: string;
+          group_id?: string | null;
           published?: boolean;
           published_at?: string;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'announcements_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'groups';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       announcement_reactions: {
         Row: AnnouncementReaction;
@@ -783,6 +907,14 @@ export type Database = {
         Args: Record<string, never>;
         Returns: boolean;
       };
+      is_super_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      can_upload_media: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
       is_group_leader_role: {
         Args: Record<string, never>;
         Returns: boolean;
@@ -794,6 +926,19 @@ export type Database = {
       leads_group: {
         Args: { p_group_id: string };
         Returns: boolean;
+      };
+      create_church_group: {
+        Args: {
+          p_name: string;
+          p_description?: string | null;
+          p_requires_approval?: boolean;
+          p_published?: boolean;
+        };
+        Returns: ChurchGroup;
+      };
+      request_join_group: {
+        Args: { p_group_id: string };
+        Returns: GroupMember;
       };
       can_manage_event: {
         Args: { p_event_id: string };

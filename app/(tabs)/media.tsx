@@ -8,7 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { useRouter, type Href } from 'expo-router';
+import { Link, useRouter, type Href } from 'expo-router';
 
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
@@ -17,6 +17,8 @@ import { SocialLinks } from '@/components/ui/SocialLinks';
 import { TextField } from '@/components/ui/TextField';
 import { brand } from '@/constants/brand';
 import { colors, radii, spacing } from '@/constants/theme';
+import { canPublishMedia } from '@/features/admin/utils/permissions';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { MediaCard } from '@/features/media/components/MediaCard';
 import { YoutubeLiveEmbed } from '@/features/media/components/YoutubeLiveEmbed';
 import { YoutubePlayer } from '@/features/media/components/YoutubePlayer';
@@ -27,6 +29,8 @@ import { isWithinSundayLiveWindow } from '@/features/media/utils/liveSchedule';
 type TabKey = 'sermons' | 'live' | 'photos';
 
 export default function MediaScreen() {
+  const { profile } = useAuth();
+  const canPublish = canPublishMedia(profile);
   const [tab, setTab] = useState<TabKey>('sermons');
 
   return (
@@ -34,6 +38,16 @@ export default function MediaScreen() {
       <View style={styles.header}>
         <AppText variant="title">Media</AppText>
         <AppText muted>Sermons, live services, and photo albums.</AppText>
+        {canPublish ? (
+          <View style={styles.publishRow}>
+            <Link href={'/admin/media' as Href} asChild>
+              <Button label="Publish sermon" />
+            </Link>
+            <Link href={'/admin/albums' as Href} asChild>
+              <Button label="Albums" variant="secondary" />
+            </Link>
+          </View>
+        ) : null}
         <View style={styles.tabs}>
           <TabChip label="Sermons" active={tab === 'sermons'} onPress={() => setTab('sermons')} />
           <TabChip label="Live" active={tab === 'live'} onPress={() => setTab('live')} />
@@ -282,6 +296,11 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
+    gap: spacing.sm,
+  },
+  publishRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
   },
   tabs: {

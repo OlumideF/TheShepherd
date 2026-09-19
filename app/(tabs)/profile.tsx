@@ -7,10 +7,15 @@ import { Screen } from '@/components/ui/Screen';
 import { TextField } from '@/components/ui/TextField';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import {
+  canAccessAdminHub,
+  canPublishMedia,
+} from '@/features/admin/utils/permissions';
 import { PrivacyToggles } from '@/features/members/components/PrivacyToggles';
 import { useHousehold } from '@/features/members/hooks/useHousehold';
 import { NotificationPrefsPanel } from '@/features/communication/components/NotificationPrefsPanel';
 import { supabase } from '@/lib/supabase/client';
+import { Link, type Href } from 'expo-router';
 
 export default function ProfileScreen() {
   const { profile, user, signOut, refreshProfile, isConfigured } = useAuth();
@@ -119,6 +124,24 @@ export default function ProfileScreen() {
             value={profile?.membership_status ?? '—'}
           />
         </View>
+
+        {(canAccessAdminHub(profile) || canPublishMedia(profile)) && (
+          <Section title="Admin tools">
+            {canAccessAdminHub(profile) ? (
+              <Link href={'/admin' as Href} asChild>
+                <Button label="Open admin hub" />
+              </Link>
+            ) : null}
+            {canPublishMedia(profile) ? (
+              <Link href={'/admin/media' as Href} asChild>
+                <Button
+                  label="Publish media"
+                  variant={canAccessAdminHub(profile) ? 'secondary' : 'primary'}
+                />
+              </Link>
+            ) : null}
+          </Section>
+        )}
 
         <Section title="Basics">
           <TextField
