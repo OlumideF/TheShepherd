@@ -100,6 +100,16 @@ Product and technical choices that are not obvious from the code. Append; do not
 | Roles UI | Set `role` + `membership_status` + upload flag | Spec ask. |
 | Dashboard | Member counts + upcoming events + 7d RSVPs/prayers/reactions | Spec ask: simple engagement mix. |
 
+## 2026-09-20 — Group invites & direct add
+
+| Decision | Choice | Why |
+|---|---|---|
+| Invite | 6-char `groups.invite_code` + deep link `/groups/join?code=` | Same pattern as household codes; shareable. |
+| Join via invite | Auto-approved member | Leader/admin already vouched by sharing the link. |
+| Direct add | Admins + group leaders via `add_group_member` | Spec ask after create; leaders already manage roster. |
+| Candidate search | Admins: all profiles; leaders: directory-visible only | Privacy: non-directory members use the invite link. |
+| Rotate code | Leaders/admins can generate a new code | Invalidates old shared links when needed. |
+
 ## 2026-03-19 — Web hosting (Vercel)
 
 | Decision | Choice | Why |

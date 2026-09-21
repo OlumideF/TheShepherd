@@ -103,9 +103,18 @@ export type ChurchGroup = {
   description: string | null;
   published: boolean;
   requires_approval: boolean;
+  invite_code: string;
   created_by: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type GroupAddCandidate = {
+  id: string;
+  display_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
 };
 
 export type GroupMember = {
@@ -457,6 +466,7 @@ export type Database = {
           description?: string | null;
           published?: boolean;
           requires_approval?: boolean;
+          invite_code?: string;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -466,6 +476,7 @@ export type Database = {
           description?: string | null;
           published?: boolean;
           requires_approval?: boolean;
+          invite_code?: string;
           created_by?: string | null;
           updated_at?: string;
         };
@@ -943,6 +954,22 @@ export type Database = {
       request_join_group: {
         Args: { p_group_id: string };
         Returns: GroupMember;
+      };
+      add_group_member: {
+        Args: { p_group_id: string; p_profile_id: string };
+        Returns: GroupMember;
+      };
+      join_group_by_invite: {
+        Args: { p_code: string };
+        Returns: GroupMember;
+      };
+      search_members_for_group: {
+        Args: { p_group_id: string; p_search?: string };
+        Returns: GroupAddCandidate[];
+      };
+      rotate_group_invite: {
+        Args: { p_group_id: string };
+        Returns: ChurchGroup;
       };
       can_manage_event: {
         Args: { p_event_id: string };

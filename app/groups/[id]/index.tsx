@@ -16,6 +16,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { AnnouncementCard } from '@/features/communication/components/AnnouncementCard';
 import { useAnnouncements } from '@/features/communication/hooks/useAnnouncements';
 import { AttendancePanel } from '@/features/groups/components/AttendancePanel';
+import { GroupInvitePanel } from '@/features/groups/components/GroupInvitePanel';
 import { GroupMessagesPanel } from '@/features/groups/components/GroupMessagesPanel';
 import { RosterRow } from '@/features/groups/components/RosterRow';
 import {
@@ -200,7 +201,14 @@ export default function GroupDetailScreen() {
               <Button label="Group announcement" variant="secondary" />
             </Link>
           ) : null}
+          {isLeader ? (
+            <Link href={`/groups/${group.id}/add` as Href} asChild>
+              <Button label="Add members" variant="secondary" />
+            </Link>
+          ) : null}
         </View>
+
+        {isLeader ? <GroupInvitePanel group={group} /> : null}
 
         {actionError ? (
           <AppText color={colors.danger}>{actionError}</AppText>

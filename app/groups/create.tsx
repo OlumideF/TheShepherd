@@ -59,8 +59,9 @@ export default function CreateGroupScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <AppText variant="title">New group</AppText>
         <AppText muted>
-          You become the leader of this group. Members request to join unless
-          you turn off approval.
+          You become the leader. After creating, you can add members or share an
+          invite link. Members can also request to join unless you turn off
+          approval.
         </AppText>
 
         <TextField label="Name" value={name} onChangeText={setName} />

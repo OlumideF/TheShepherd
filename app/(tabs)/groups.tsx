@@ -36,17 +36,24 @@ export default function GroupsScreen() {
               <View style={styles.titleBlock}>
                 <AppText variant="title">Groups</AppText>
                 <AppText muted>
-                  Browse ministries and small groups. Request to join — leaders
-                  approve.
+                  Browse ministries and small groups. Request to join, or use an
+                  invite code from a leader.
                 </AppText>
               </View>
-              {showCreate ? (
+              <View style={styles.headerActions}>
                 <Button
-                  label="New"
-                  variant="secondary"
-                  onPress={() => router.push('/groups/create' as Href)}
+                  label="Invite code"
+                  variant="ghost"
+                  onPress={() => router.push('/groups/join' as Href)}
                 />
-              ) : null}
+                {showCreate ? (
+                  <Button
+                    label="New"
+                    variant="secondary"
+                    onPress={() => router.push('/groups/create' as Href)}
+                  />
+                ) : null}
+              </View>
             </View>
             {isLoading ? (
               <ActivityIndicator color={colors.accent} style={styles.loader} />
@@ -97,6 +104,12 @@ const styles = StyleSheet.create({
   titleBlock: {
     flex: 1,
     gap: spacing.xs,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    justifyContent: 'flex-end',
   },
   loader: {
     marginVertical: spacing.md,

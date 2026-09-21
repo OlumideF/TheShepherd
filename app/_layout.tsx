@@ -127,7 +127,9 @@ export default function RootLayout() {
             <Stack.Screen name="announcements/create" options={{ headerShown: true, title: 'Announcement' }} />
             <Stack.Screen name="broadcasts/create" options={{ headerShown: true, title: 'Broadcast' }} />
             <Stack.Screen name="groups/create" options={{ headerShown: true, title: 'New group' }} />
-            <Stack.Screen name="groups/[id]" options={{ headerShown: true, title: 'Group' }} />
+            <Stack.Screen name="groups/join" options={{ headerShown: true, title: 'Join with code' }} />
+            <Stack.Screen name="groups/[id]/index" options={{ headerShown: true, title: 'Group' }} />
+            <Stack.Screen name="groups/[id]/add" options={{ headerShown: true, title: 'Add members' }} />
             <Stack.Screen name="admin/index" options={{ headerShown: true, title: 'Admin' }} />
             <Stack.Screen name="admin/media/index" options={{ headerShown: true, title: 'Publish media' }} />
             <Stack.Screen name="admin/media/create" options={{ headerShown: true, title: 'New sermon' }} />

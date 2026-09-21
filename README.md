@@ -34,6 +34,7 @@ Congregation-first member app (Expo + Supabase). Source of truth: `PROJECT_SPEC.
      5. `supabase/migrations/20260319040000_phase5_communication.sql`
      6. `supabase/migrations/20260319050000_phase6_groups.sql`
      7. `supabase/migrations/20260319060000_phase7_admin.sql` (idempotent; safe to re-run)
+     8. `supabase/migrations/20260319070000_group_invites.sql` (invite codes + add-member RPCs)
    - To promote yourself to admin after first signup:
      ```sql
      update public.profiles set role = 'admin' where email = 'you@example.com';
@@ -85,7 +86,7 @@ app/                 # expo-router screens
   member/[id].tsx    # directory member detail
   media/             # sermon + album detail
   events/            # event detail, create, edit
-  groups/            # group detail + create
+  groups/            # group detail, create, join-by-code, add members
   prayer/            # prayer wall
   notifications/     # in-app inbox
   announcements/     # admin / leader create
@@ -98,7 +99,7 @@ features/members/    # directory, privacy, households
 features/media/      # sermons, live, audio, photo albums
 features/events/     # calendar, RSVP, recurrence, volunteers
 features/communication/  # announcements, prayer, push, broadcasts
-features/groups/     # browse/join, roster, messages, attendance
+features/groups/     # browse/join, roster, invites, messages, attendance
 lib/supabase/        # client, storage, types
 constants/theme.ts   # design tokens
 supabase/migrations/ # Postgres + RLS
@@ -111,4 +112,4 @@ See [DECISIONS.md](./DECISIONS.md).
 
 ## Phases
 
-Work phase-by-phase per `PROJECT_SPEC.md`. Phase 7 = admin (media publishing, albums, roles, moderation, dashboard).
+Work phase-by-phase per `PROJECT_SPEC.md`. Phase 7 = admin (media publishing, albums, roles, moderation, dashboard). Group invite links / direct add-member shipped after Phase 7.

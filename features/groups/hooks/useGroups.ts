@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
 import type {
   ChurchGroup,
+  GroupAddCandidate,
   GroupAttendance,
   GroupMeeting,
   GroupMember,
@@ -182,6 +183,83 @@ export function useRequestJoinGroup() {
       await qc.invalidateQueries({ queryKey: ['group-membership', row.group_id] });
       await qc.invalidateQueries({ queryKey: ['group-roster', row.group_id] });
       await qc.invalidateQueries({ queryKey: ['my-approved-groups'] });
+    },
+  });
+}
+
+export function useAddGroupMember() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: { groupId: string; profileId: string }) => {
+      const { data, error } = await supabase.rpc('add_group_member', {
+        p_group_id: args.groupId,
+        p_profile_id: args.profileId,
+      });
+      if (error) throw error;
+      return data as GroupMember;
+    },
+    onSuccess: async (row) => {
+      await qc.invalidateQueries({ queryKey: ['group-roster', row.group_id] });
+      await qc.invalidateQueries({ queryKey: ['groups'] });
+      await qc.invalidateQueries({
+        queryKey: ['group-add-candidates', row.group_id],
+      });
+    },
+  });
+}
+
+export function useJoinGroupByInvite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (code: string) => {
+      const { data, error } = await supabase.rpc('join_group_by_invite', {
+        p_code: code.trim().toUpperCase(),
+      });
+      if (error) throw error;
+      return data as GroupMember;
+    },
+    onSuccess: async (row) => {
+      await qc.invalidateQueries({ queryKey: ['groups'] });
+      await qc.invalidateQueries({ queryKey: ['group-membership', row.group_id] });
+      await qc.invalidateQueries({ queryKey: ['group-roster', row.group_id] });
+      await qc.invalidateQueries({ queryKey: ['my-approved-groups'] });
+    },
+  });
+}
+
+export function useSearchMembersForGroup(
+  groupId: string | undefined,
+  search: string,
+  enabled: boolean,
+) {
+  return useQuery({
+    queryKey: ['group-add-candidates', groupId, search.trim()],
+    enabled: enabled && Boolean(groupId),
+    queryFn: async (): Promise<GroupAddCandidate[]> => {
+      if (!groupId) return [];
+      const { data, error } = await supabase.rpc('search_members_for_group', {
+        p_group_id: groupId,
+        p_search: search.trim() || '',
+      });
+      if (error) throw error;
+      return (data as GroupAddCandidate[]) ?? [];
+    },
+  });
+}
+
+export function useRotateGroupInvite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (groupId: string) => {
+      const { data, error } = await supabase.rpc('rotate_group_invite', {
+        p_group_id: groupId,
+      });
+      if (error) throw error;
+      return data as ChurchGroup;
+    },
+    onSuccess: async (group) => {
+      await qc.invalidateQueries({ queryKey: ['group', group.id] });
+      await qc.invalidateQueries({ queryKey: ['groups'] });
     },
   });
 }
