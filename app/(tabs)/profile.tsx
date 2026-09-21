@@ -128,7 +128,7 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {(showAdminHub || showPublish) && (
+        {(showAdminHub || showPublish) ? (
           <Section title="Admin tools">
             {showAdminHub ? (
               <Link href={'/admin' as Href} asChild>
@@ -144,6 +144,11 @@ export default function ProfileScreen() {
               </Link>
             ) : null}
           </Section>
+        ) : (
+          <AppText muted variant="caption">
+            Admin tools appear here when your role is admin (or you have upload
+            access).
+          </AppText>
         )}
 
         <Section title="Basics">

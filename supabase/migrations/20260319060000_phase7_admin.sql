@@ -84,26 +84,7 @@ revoke all on function public.can_upload_media() from public;
 grant execute on function public.can_upload_media() to authenticated;
 
 -- ---------------------------------------------------------------------------
--- 3. Promote existing rccgauburn@gmail.com (auth or profile email)
--- ---------------------------------------------------------------------------
-update public.profiles p
-set
-  role = 'admin',
-  can_upload_media = true,
-  email = coalesce(nullif(p.email, ''), u.email),
-  membership_status = case
-    when p.membership_status = 'visitor' then 'active'::public.membership_status
-    else p.membership_status
-  end
-from auth.users u
-where p.id = u.id
-  and (
-    lower(coalesce(p.email, '')) = 'rccgauburn@gmail.com'
-    or lower(coalesce(u.email, '')) = 'rccgauburn@gmail.com'
-  );
-
--- ---------------------------------------------------------------------------
--- 4. Login sync: promote current user if JWT email is super admin
+-- 3. Login sync: promote current user if JWT email is super admin
 -- ---------------------------------------------------------------------------
 create or replace function public.ensure_super_admin()
 returns public.profiles
@@ -143,7 +124,7 @@ revoke all on function public.ensure_super_admin() from public;
 grant execute on function public.ensure_super_admin() to authenticated;
 
 -- ---------------------------------------------------------------------------
--- 5. Signup: auto-promote super admin on first register
+-- 4. Signup: auto-promote super admin on first register
 -- ---------------------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger
@@ -179,8 +160,9 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 6. Protect role / membership / upload flag
---    - Non-admins cannot change them
+-- 5. Protect role / membership / upload flag
+--    - SQL Editor / migrations (no auth.uid) may set anything (bootstrap)
+--    - Non-admins cannot escalate (except onboarding membership + leader sync)
 --    - Only super admin may grant/revoke admin
 --    - Super admin email always stays admin + upload
 -- ---------------------------------------------------------------------------
@@ -191,13 +173,45 @@ security definer
 set search_path = public
 as $$
 begin
-  if not public.is_admin() then
-    new.role := old.role;
-    new.membership_status := old.membership_status;
-    new.can_upload_media := old.can_upload_media;
+  -- Super admin email is always admin (apply first so SQL Editor updates stick)
+  if lower(coalesce(old.email, '')) = 'rccgauburn@gmail.com'
+     or lower(coalesce(new.email, '')) = 'rccgauburn@gmail.com' then
+    new.role := 'admin';
+    new.can_upload_media := true;
+  end if;
+
+  -- No JWT = service role / SQL Editor / migration — allow the write
+  if auth.uid() is null then
     return new;
   end if;
 
+  if not public.is_admin()
+     and current_setting('app.syncing_group_leader', true) is distinct from 'on' then
+    new.role := old.role;
+    new.can_upload_media := old.can_upload_media;
+    if not (
+      old.onboarding_completed_at is null
+      and new.onboarding_completed_at is not null
+    ) then
+      new.membership_status := old.membership_status;
+    end if;
+    return new;
+  end if;
+
+  -- Group-leader bump path: allow role change, still lock membership unless onboarding
+  if not public.is_admin()
+     and current_setting('app.syncing_group_leader', true) = 'on' then
+    new.can_upload_media := old.can_upload_media;
+    if not (
+      old.onboarding_completed_at is null
+      and new.onboarding_completed_at is not null
+    ) then
+      new.membership_status := old.membership_status;
+    end if;
+    return new;
+  end if;
+
+  -- Regular admins cannot grant/revoke admin or edit other admins
   if not public.is_super_admin() then
     if old.role = 'admin' and new.role is distinct from old.role then
       new.role := old.role;
@@ -212,6 +226,7 @@ begin
     end if;
   end if;
 
+  -- Re-assert super admin lock after other checks
   if lower(coalesce(old.email, '')) = 'rccgauburn@gmail.com'
      or lower(coalesce(new.email, '')) = 'rccgauburn@gmail.com' then
     new.role := 'admin';
@@ -221,6 +236,22 @@ begin
   return new;
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- 6. Promote existing rccgauburn@gmail.com (AFTER trigger fix so it sticks)
+-- ---------------------------------------------------------------------------
+update public.profiles p
+set
+  role = 'admin',
+  can_upload_media = true,
+  email = coalesce(nullif(p.email, ''), u.email),
+  membership_status = 'active'
+from auth.users u
+where p.id = u.id
+  and (
+    lower(coalesce(p.email, '')) = 'rccgauburn@gmail.com'
+    or lower(coalesce(u.email, '')) = 'rccgauburn@gmail.com'
+  );
 
 -- ---------------------------------------------------------------------------
 -- 7. Media / album / photo RLS (uploaders write; members read published)

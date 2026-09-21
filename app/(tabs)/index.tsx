@@ -11,15 +11,21 @@ import { useAnnouncements } from '@/features/communication/hooks/useAnnouncement
 import { useNotifications } from '@/features/communication/hooks/useNotifications';
 import { usePushRegistration } from '@/features/communication/hooks/usePushRegistration';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import {
+  canAccessAdminHub,
+  canPublishMedia,
+} from '@/features/admin/utils/permissions';
 import { brand } from '@/constants/brand';
 import { colors, radii, spacing } from '@/constants/theme';
 
 export default function HomeScreen() {
   const { profile, user } = useAuth();
   const profileId = profile?.id ?? user?.id;
-  const isAdmin = profile?.role === 'admin';
+  const authEmail = user?.email ?? profile?.email;
+  const isAdmin = canAccessAdminHub(profile, authEmail);
   const canBroadcast =
-    profile?.role === 'admin' || profile?.role === 'group_leader';
+    isAdmin || profile?.role === 'group_leader';
+  const canPublish = canPublishMedia(profile, authEmail);
 
   usePushRegistration(profileId);
 
@@ -54,16 +60,29 @@ export default function HomeScreen() {
               <Button label="Prayer wall" variant="secondary" />
             </Link>
           </View>
-          {(isAdmin || canBroadcast) && (
+          {(isAdmin || canBroadcast || canPublish) && (
             <View style={styles.heroActions}>
+              {isAdmin ? (
+                <Link href={'/admin' as Href} asChild>
+                  <Button label="Admin hub" />
+                </Link>
+              ) : null}
               {isAdmin || canBroadcast ? (
                 <Link href={'/announcements/create' as Href} asChild>
-                  <Button label="New announcement" />
+                  <Button
+                    label="New announcement"
+                    variant={isAdmin ? 'secondary' : 'primary'}
+                  />
                 </Link>
               ) : null}
               {canBroadcast ? (
                 <Link href={'/broadcasts/create' as Href} asChild>
-                  <Button label="Broadcast" variant="secondary" />
+                  <Button label="Broadcast" variant="ghost" />
+                </Link>
+              ) : null}
+              {canPublish && !isAdmin ? (
+                <Link href={'/admin/media' as Href} asChild>
+                  <Button label="Publish media" variant="secondary" />
                 </Link>
               ) : null}
             </View>

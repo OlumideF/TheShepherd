@@ -37,8 +37,14 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data: ensured, error: ensureError } = await supabase.rpc(
     'ensure_super_admin',
   );
-  if (!ensureError && ensured) {
-    return ensured as Profile;
+  const ensuredRow = Array.isArray(ensured) ? ensured[0] : ensured;
+  if (
+    !ensureError &&
+    ensuredRow &&
+    typeof ensuredRow === 'object' &&
+    'id' in ensuredRow
+  ) {
+    return ensuredRow as Profile;
   }
 
   const { data, error } = await supabase
